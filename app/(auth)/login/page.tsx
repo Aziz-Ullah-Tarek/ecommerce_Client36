@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiMail, FiLock, FiAlertCircle } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +14,13 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError("");
+    await signIn('google', { callbackUrl: '/' });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +111,27 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={googleLoading}
+          className="w-full py-3 px-4 border border-gray-300 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-50 transform hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          <FcGoogle className="text-xl" />
+          <span className="font-medium text-gray-700">
+            {googleLoading ? "Connecting..." : "Sign in with Google"}
+          </span>
+        </button>
 
         <div className="text-center text-sm">
           <span className="text-gray-600">Don't have an account? </span>

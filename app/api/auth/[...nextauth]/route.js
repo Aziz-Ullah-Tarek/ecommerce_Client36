@@ -1,11 +1,23 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -39,21 +51,40 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || 'user';
         token.accessToken = user.token;
       }
+      
+      // Handle Google OAuth
+      if (account?.provider === "google") {
+        token.role = token.role || 'user';
+      }
+      
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.role = token.role || 'user';
         session.accessToken = token.accessToken;
       }
       return session;
+    },
+    async signIn({ user, account, profile }) {
+      // Allow Google OAuth sign in
+      if (account?.provider === "google") {
+        return true;
+      }
+      
+      // Allow credentials sign in
+      if (account?.provider === "credentials") {
+        return true;
+      }
+      
+      return true;
     },
   },
   pages: {
