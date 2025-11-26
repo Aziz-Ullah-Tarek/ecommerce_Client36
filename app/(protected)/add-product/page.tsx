@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FiPackage, FiDollarSign, FiTag, FiImage, FiAlertCircle } from "react-icons/fi";
+import { FiPackage, FiDollarSign, FiTag, FiImage, FiAlertCircle, FiCheckCircle, FiFileText, FiCalendar, FiTrendingUp } from "react-icons/fi";
 
 export default function AddProductPage() {
   const { data: session, status } = useSession();
@@ -13,11 +13,13 @@ export default function AddProductPage() {
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    shortDescription: "",
     description: "",
     price: "",
     category: "Electronics",
     stock: "",
     images: "",
+    featured: false,
   });
 
   useEffect(() => {
@@ -37,10 +39,13 @@ export default function AddProductPage() {
       const token = session?.accessToken;
 
       const productData = {
-        ...formData,
+        name: formData.name,
+        description: formData.shortDescription || formData.description,
         price: parseFloat(formData.price),
+        category: formData.category,
         stock: parseInt(formData.stock),
         images: formData.images ? formData.images.split(",").map((img) => img.trim()) : [],
+        featured: formData.featured,
       };
 
       await axios.post(`${API_URL}/products`, productData, {
@@ -52,11 +57,13 @@ export default function AddProductPage() {
       setSuccess(true);
       setFormData({
         name: "",
+        shortDescription: "",
         description: "",
         price: "",
         category: "Electronics",
         stock: "",
         images: "",
+        featured: false,
       });
 
       setTimeout(() => {
@@ -94,8 +101,9 @@ export default function AddProductPage() {
           )}
 
           {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 text-green-600">
-              <span className="text-sm">Product added successfully! Redirecting...</span>
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2 text-green-600 animate-pulse">
+              <FiCheckCircle className="text-xl" />
+              <span className="text-sm font-medium">✓ Product added successfully! Redirecting to manage products...</span>
             </div>
           )}
 
@@ -117,15 +125,35 @@ export default function AddProductPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                <FiFileText className="inline mr-2" />
+                Short Description
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.shortDescription}
+                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Brief product description (1-2 lines)"
+                maxLength={150}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                {formData.shortDescription.length}/150 characters
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <FiFileText className="inline mr-2" />
+                Full Description
               </label>
               <textarea
                 required
-                rows={4}
+                rows={5}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="Enter product description"
+                placeholder="Enter detailed product description"
               />
             </div>
 
@@ -166,18 +194,52 @@ export default function AddProductPage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FiTrendingUp className="inline mr-2" />
+                  Priority
+                </label>
+                <select
+                  value={formData.featured ? "high" : "standard"}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.value === "high" })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                >
+                  <option value="standard">Standard</option>
+                  <option value="high">High (Featured)</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Stock Quantity
+                <FiCalendar className="inline mr-2" />
+                Date Added
               </label>
               <input
-                type="number"
-                required
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="0"
+                type="text"
+                disabled
+                value={new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Date will be automatically set upon product creation
+              </p>
             </div>
 
             <div>
