@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiMail, FiLock, FiAlertCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,7 +20,14 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError("");
-    await signIn('google', { callbackUrl: '/' });
+    try {
+      await loginWithGoogle();
+      router.push("/");
+    } catch (err) {
+      setError(err.message || "Failed to sign in with Google");
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -28,20 +36,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        router.push("/");
-        router.refresh();
-      }
+      await login(formData.email, formData.password);
+      router.push("/");
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }

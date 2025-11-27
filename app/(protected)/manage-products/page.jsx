@@ -1,30 +1,23 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { FiEdit2, FiTrash2, FiPlus, FiPackage, FiEye, FiShoppingCart, FiStar } from "react-icons/fi";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/lib/AuthContext";
 
-export default function ManageProductsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+function ManageProductsContent() {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (session) {
+    if (user) {
       fetchProducts();
     }
-  }, [session]);
+  }, [user]);
 
   const fetchProducts = async () => {
     try {
@@ -45,13 +38,8 @@ export default function ManageProductsPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const token = session?.accessToken;
-
-      await axios.delete(`${API_URL}/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      
+      await axios.delete(`${API_URL}/products/${id}`);
 
       setProducts(products.filter((p) => p._id !== id));
     } catch (err) {
@@ -59,7 +47,7 @@ export default function ManageProductsPage() {
     }
   };
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-600">Loading...</div>
@@ -282,5 +270,13 @@ export default function ManageProductsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ManageProductsPage() {
+  return (
+    <ProtectedRoute>
+      <ManageProductsContent />
+    </ProtectedRoute>
   );
 }

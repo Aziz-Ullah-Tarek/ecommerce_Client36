@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { useSession, signOut } from "next-auth/react";
 import { FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -40,26 +40,23 @@ export default function Navbar() {
 
           {/* Auth Buttons / User Dropdown */}
           <div className="hidden md:flex items-center space-x-4">
-            {session ? (
+            {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
                   <FiUser />
-                  <span>{session.user?.name || session.user?.email}</span>
+                  <span>{user?.displayName || user?.email}</span>
                 </button>
                 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 border border-gray-100">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900">
-                        {session.user?.name}
+                        {user?.displayName}
                       </p>
-                      <p className="text-xs text-gray-500">{session.user?.email}</p>
-                      <p className="text-xs text-blue-600 mt-1 capitalize">
-                        {session.user?.role || 'User'}
-                      </p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                     <Link
                       href="/add-product"
@@ -77,7 +74,7 @@ export default function Navbar() {
                     </Link>
                     <button
                       onClick={() => {
-                        signOut({ callbackUrl: "/" });
+                        logout();
                         setIsDropdownOpen(false);
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
@@ -134,11 +131,11 @@ export default function Navbar() {
                 Contact
               </Link>
               
-              {session ? (
+              {user ? (
                 <>
                   <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm font-semibold text-gray-900">{session.user?.name}</p>
-                    <p className="text-xs text-gray-500">{session.user?.email}</p>
+                    <p className="text-sm font-semibold text-gray-900">{user?.displayName}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
                   <Link
                     href="/add-product"
@@ -154,7 +151,7 @@ export default function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      signOut({ callbackUrl: "/" });
+                      logout();
                       setIsMenuOpen(false);
                     }}
                     className="text-left text-red-600 hover:text-red-700 transition"

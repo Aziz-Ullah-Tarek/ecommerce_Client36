@@ -2,13 +2,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import axios from "axios";
-import { signIn } from "next-auth/react";
 import { FiUser, FiMail, FiLock, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { signup, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,7 +22,14 @@ export default function RegisterPage() {
   const handleGoogleSignUp = async () => {
     setGoogleLoading(true);
     setError("");
-    await signIn('google', { callbackUrl: '/' });
+    try {
+      await loginWithGoogle();
+      router.push("/");
+    } catch (err) {
+      setError(err.message || "Failed to sign up with Google");
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -42,17 +49,10 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      await axios.post(`${API_URL}/users/register`, {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Redirect to login after successful registration
-      router.push("/login?registered=true");
+      await signup(formData.email, formData.password, formData.name);
+      router.push("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

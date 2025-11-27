@@ -1,30 +1,25 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SessionWrapper from "@/components/SessionWrapper";
+import { AuthContextProvider } from "@/lib/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "ShopHub - Your Premium eCommerce Destination",
   description: "Discover quality products at unbeatable prices",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionWrapper>
+        <AuthContextProvider>
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <Footer />
-        </SessionWrapper>
+        </AuthContextProvider>
       </body>
     </html>
   );

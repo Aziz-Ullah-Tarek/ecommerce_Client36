@@ -1,13 +1,12 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { FiPackage, FiDollarSign, FiTag, FiImage, FiAlertCircle, FiCheckCircle, FiFileText, FiCalendar, FiTrendingUp } from "react-icons/fi";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/lib/AuthContext";
 
-export default function AddProductPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+function AddProductContent() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -22,12 +21,6 @@ export default function AddProductPage() {
     featured: false,
   });
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -36,7 +29,6 @@ export default function AddProductPage() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const token = session?.accessToken;
 
       const productData = {
         name: formData.name,
@@ -48,11 +40,7 @@ export default function AddProductPage() {
         featured: formData.featured,
       };
 
-      await axios.post(`${API_URL}/products`, productData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(`${API_URL}/products`, productData);
 
       setSuccess(true);
       setFormData({
@@ -66,23 +54,12 @@ export default function AddProductPage() {
         featured: false,
       });
 
-      setTimeout(() => {
-        router.push("/manage-products");
-      }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add product");
     } finally {
       setLoading(false);
     }
   };
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -276,5 +253,13 @@ export default function AddProductPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AddProductPage() {
+  return (
+    <ProtectedRoute>
+      <AddProductContent />
+    </ProtectedRoute>
   );
 }

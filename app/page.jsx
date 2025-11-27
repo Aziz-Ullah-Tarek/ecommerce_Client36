@@ -1,8 +1,34 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 import { FiShoppingBag, FiTruck, FiShield, FiStar, FiAward } from "react-icons/fi";
 
 export default function HomePage() {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const response = await axios.get(`${API_URL}/products`);
+      // Get first 6 products or featured products
+      const products = response.data.filter(p => p.featured).slice(0, 6);
+      if (products.length === 0) {
+        setFeaturedProducts(response.data.slice(0, 6));
+      } else {
+        setFeaturedProducts(products);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      // Use default products if API fails
+      setFeaturedProducts([]);
+    }
+  };
+
   return (
     <div>
       {/* 1. Hero Section */}
@@ -83,62 +109,30 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                name: "Wireless Headphones",
-                price: "$99.99",
-                category: "Electronics",
-                rating: 4.5,
-              },
-              {
-                name: "Smart Watch",
-                price: "$199.99",
-                category: "Electronics",
-                rating: 4.8,
-              },
-              {
-                name: "Running Shoes",
-                price: "$79.99",
-                category: "Sports",
-                rating: 4.6,
-              },
-              {
-                name: "Laptop Bag",
-                price: "$49.99",
-                category: "Accessories",
-                rating: 4.3,
-              },
-              {
-                name: "Coffee Maker",
-                price: "$129.99",
-                category: "Home",
-                rating: 4.7,
-              },
-              {
-                name: "Bluetooth Speaker",
-                price: "$69.99",
-                category: "Electronics",
-                rating: 4.4,
-              },
-              {
-                name: "Yoga Mat",
-                price: "$29.99",
-                category: "Sports",
-                rating: 4.5,
-              },
-              {
-                name: "Water Bottle",
-                price: "$19.99",
-                category: "Sports",
-                rating: 4.2,
-              },
-            ].map((product, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-2 transition group"
+            {featuredProducts.length === 0 ? (
+              <div className="col-span-4 text-center py-12">
+                <FiShoppingBag className="text-6xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 mb-4">No featured products available yet.</p>
+                <Link href="/add-product" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition">
+                  Add Your First Product
+                </Link>
+              </div>
+            ) : featuredProducts.map((product, index) => (
+              <Link
+                key={product._id || index}
+                href={`/products/${product._id || '#'}`}
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-2 transition group block"
               >
-                <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center group-hover:from-blue-100 group-hover:to-purple-100 transition">
-                  <FiShoppingBag className="text-6xl text-gray-400 group-hover:text-blue-600 transition" />
+                <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center group-hover:from-blue-100 group-hover:to-purple-100 transition relative">
+                  {product.images && product.images.length > 0 ? (
+                    <img 
+                      src={product.images[0]} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FiShoppingBag className="text-6xl text-gray-400 group-hover:text-blue-600 transition" />
+                  )}
                 </div>
                 <div className="p-4">
                   <span className="text-xs text-blue-600 font-semibold">
@@ -149,20 +143,30 @@ export default function HomePage() {
                   </h3>
                   <div className="flex items-center mb-2">
                     <FiStar className="text-yellow-400 fill-yellow-400" />
-                    <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
+                    <span className="text-sm text-gray-600 ml-1">{product.rating || 4.5}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-gray-900">
-                      {product.price}
+                      {product.price && !product.price.toString().startsWith('$') ? `$${product.price}` : product.price}
                     </span>
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
                       Add to Cart
                     </button>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
+          {featuredProducts.length > 0 && (
+            <div className="text-center mt-12">
+              <Link
+                href="/products"
+                className="inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transform hover:scale-105 transition"
+              >
+                View All Products
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
