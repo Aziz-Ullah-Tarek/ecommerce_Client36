@@ -53,7 +53,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://shophub-one-rosy.vercel.app/api";
       await axios.post(`${API_URL}/users/register`, {
         name: formData.name,
         email: formData.email,

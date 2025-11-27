@@ -6,7 +6,7 @@ import { FiArrowLeft, FiShoppingCart, FiStar, FiPackage, FiTag, FiCalendar, FiTr
 import axios from "@/lib/axios";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-function ProductDetailsContent({ params }) {
+function ProductDetailsContent({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
   const [product, setProduct] = useState(null);
@@ -17,7 +17,7 @@ function ProductDetailsContent({ params }) {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://shophub-one-rosy.vercel.app/api";
         const response = await axios.get(`${API_URL}/products/${id}`);
         setProduct(response.data);
       } catch (error) {
@@ -286,7 +286,7 @@ function ProductDetailsContent({ params }) {
   );
 }
 
-export default function ProductDetailsPage({ params }) {
+export default function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <ProtectedRoute>
       <ProductDetailsContent params={params} />

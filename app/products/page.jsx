@@ -23,7 +23,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://shophub-one-rosy.vercel.app/api";
       const response = await axios.get(`${API_URL}/products`);
       setProducts(response.data);
       setFilteredProducts(response.data);

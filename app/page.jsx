@@ -13,7 +13,7 @@ export default function HomePage() {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://shophub-one-rosy.vercel.app/api";
       const response = await axios.get(`${API_URL}/products`);
       // Get first 6 products or featured products
       const products = response.data.filter(p => p.featured).slice(0, 6);
