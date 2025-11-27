@@ -73,8 +73,20 @@ A modern full-stack e-commerce application built with Next.js, featuring NextAut
 - `/manage-products` - View and manage all products
 - `/edit-product/[id]` - Edit existing products
 
-### API Routes
+### Frontend API Routes
 - `/api/auth/[...nextauth]` - NextAuth.js authentication endpoints
+
+### Backend API Endpoints
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get single product by ID
+- `POST /api/products` - Create new product (protected)
+- `PUT /api/products/:id` - Update product (protected)
+- `DELETE /api/products/:id` - Delete product (protected)
+- `POST /api/users/register` - Register new user
+- `POST /api/users/login` - User login
+- `GET /api/users/profile` - Get user profile (protected)
+- `GET /api/orders` - Get all orders (protected)
+- `POST /api/orders` - Create new order (protected)
 
 ## 🔧 Technologies Used
 
