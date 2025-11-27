@@ -4,12 +4,10 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { FiPackage, FiDollarSign, FiTag, FiImage, FiAlertCircle, FiCheckCircle, FiFileText, FiCalendar, FiTrendingUp, FiArrowLeft } from "react-icons/fi";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/lib/AuthContext";
 
 function EditProductContent({ params }) {
   const router = useRouter();
   const { id } = use(params);
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState("");

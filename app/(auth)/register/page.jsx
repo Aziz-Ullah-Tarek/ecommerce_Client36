@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiUser, FiMail, FiLock, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { useAuth } from "@/lib/AuthContext";
+import { signIn } from "next-auth/react";
+import axios from "axios";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { signup, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,10 +23,14 @@ export default function RegisterPage() {
     setGoogleLoading(true);
     setError("");
     try {
-      await loginWithGoogle();
-      router.push("/");
+      const result = await signIn("google", { redirect: false });
+      if (result?.error) {
+        setError("Failed to sign up with Google");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
-      setError(err.message || "Failed to sign up with Google");
+      setError("Failed to sign up with Google");
     } finally {
       setGoogleLoading(false);
     }
@@ -49,10 +53,27 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await signup(formData.email, formData.password, formData.name);
-      router.push("/");
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      await axios.post(`${API_URL}/users/register`, {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // After successful registration, login with NextAuth
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result?.error) {
+        setError("Registration successful but login failed. Please try logging in.");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
-      setError(err.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

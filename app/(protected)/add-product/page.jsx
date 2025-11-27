@@ -3,10 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import { FiPackage, FiDollarSign, FiTag, FiImage, FiAlertCircle, FiCheckCircle, FiFileText, FiCalendar, FiTrendingUp } from "react-icons/fi";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/lib/AuthContext";
 
 function AddProductContent() {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
