@@ -1,33 +1,35 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiArrowLeft, FiShoppingCart, FiStar, FiPackage, FiTag, FiCalendar, FiTrendingUp } from "react-icons/fi";
 import axios from "@/lib/axios";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default function ProductDetailsPage({ params }) {
+function ProductDetailsContent({ params }) {
   const router = useRouter();
+  const { id } = use(params);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
-    fetchProduct();
-  }, [params.id]);
+    const fetchProduct = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const response = await axios.get(`${API_URL}/products/${id}`);
+        setProduct(response.data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setError("Product not found");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchProduct = async () => {
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const response = await axios.get(`${API_URL}/products/${params.id}`);
-      setProduct(response.data);
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      setError("Product not found");
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProduct();
+  }, [id]);
 
   if (loading) {
     return (
@@ -281,5 +283,13 @@ export default function ProductDetailsPage({ params }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductDetailsPage({ params }) {
+  return (
+    <ProtectedRoute>
+      <ProductDetailsContent params={params} />
+    </ProtectedRoute>
   );
 }

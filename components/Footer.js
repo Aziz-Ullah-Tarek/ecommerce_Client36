@@ -88,7 +88,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-sm">
                 <FiMapPin className="flex-shrink-0" />
-                <span>123 Shop Street, City, Country</span>
+                <span>123 Rankin Street,Dhaka, Bangladesh</span>
               </li>
               <li className="flex items-center space-x-2 text-sm">
                 <FiPhone className="flex-shrink-0" />
